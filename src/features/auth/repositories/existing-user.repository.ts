@@ -3,6 +3,9 @@ import type { AuthUserResult } from "../types/auth-user-result.js";
 import { db } from "../../../db/index.js";
 import { users } from "../../../db/schema.js";
 
+/**
+ * Format hasil response dari repository existing user.
+ */
 type ExsistingUserReponsitoryResult = AuthUserResult & {
   password: string;
 };

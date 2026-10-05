@@ -1,5 +1,5 @@
 import AppError from "../app-error.js";
-import { BodyValidationError } from "./parse-and-validate-body.js";
+import { BodyValidationError } from "../errors/body-validation-error.js";
 
 /**
  * Hasil normalisasi error sebelum diubah menjadi respons API.

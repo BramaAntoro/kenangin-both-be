@@ -2,12 +2,7 @@ import z from "zod";
 import AppError from "../app-error.js";
 import parseJsonBody from "./parse-json-body.js";
 import type { Request } from "express";
-
-export class BodyValidationError extends AppError {
-  constructor(public fieldErrors: Record<string, string[] | undefined>) {
-    super("Data yang dikirimkan tidak valid", 400);
-  }
-}
+import { BodyValidationError } from "../errors/body-validation-error.js";
 
 /**
  * Mem-parsing body request sebagai JSON lalu memvalidasinya menggunakan
