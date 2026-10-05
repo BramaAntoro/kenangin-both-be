@@ -18,7 +18,7 @@ export default function requireRole(
       const userRole = request.user?.role;
 
       if (!userRole || !allowedRoles.includes(userRole)) {
-        throw new AppError("Anda tidak memiliki akses ke resource ini", 403);
+        throw new AppError("404 - Not found", 404);
       }
 
       next();

@@ -5,16 +5,19 @@ import readSystemSettingsController from "./controllers/read-system-settings.con
 
 const systemSettingsRoute = Router();
 
+
+systemSettingsRoute.use(requireRole("super_admin"))
+
 systemSettingsRoute.get(
   "/",
-  requireRole("super_admin"),
   readSystemSettingsController,
 );
 
 systemSettingsRoute.post(
   "/",
-  requireRole("super_admin"),
   createSystemSettingController,
 );
+
+
 
 export default systemSettingsRoute;
