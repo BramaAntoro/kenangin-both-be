@@ -75,7 +75,7 @@ export const users = pgTable("users", {
 export const systemSettings = pgTable("system_settings", {
   id: uuid("id").defaultRandom().primaryKey(),
   settingKey: varchar("setting_key").notNull().unique(),
-  settingValue: text("setting_value").notNull(),
+  settingValue: varchar("setting_value").notNull(),
   description: text("description"),
   updatedBy: uuid("updated_by").references(() => users.id),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
