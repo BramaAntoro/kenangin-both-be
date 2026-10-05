@@ -1,6 +1,6 @@
 import { db } from "../../../db/index.js";
 import { systemSettings } from "../../../db/schema.js";
-import type { CreateSystemSettingServiceResult } from "../types/create-system-setting-service-result.js";
+import type { SystemSettingResult } from "../types/system-setting-service-result.js";
 
 /**
  * Membuat system setting baru.
@@ -13,7 +13,7 @@ export default async function createSystemSettingRepository(data: {
   settingValue: string;
   description: string | null;
   updatedBy: string;
-}): Promise<CreateSystemSettingServiceResult> {
+}): Promise<SystemSettingResult> {
   const [result] = await db
     .insert(systemSettings)
     .values({
@@ -23,10 +23,6 @@ export default async function createSystemSettingRepository(data: {
       updatedBy: data.updatedBy,
     })
     .returning();
-
-  if (!result) {
-    throw new Error("System setting gagal dibuat");
-  }
 
   return result;
 }

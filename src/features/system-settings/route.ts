@@ -2,22 +2,14 @@ import { Router } from "express";
 import requireRole from "../../middlewares/role.middleware.js";
 import createSystemSettingController from "./controllers/create-system-setting.controller.js";
 import readSystemSettingsController from "./controllers/read-system-settings.controller.js";
+import readDetailSystemSettingController from "./controllers/read-detail-system-setting.controller.js";
 
 const systemSettingsRoute = Router();
 
+systemSettingsRoute.use(requireRole("super_admin"));
 
-systemSettingsRoute.use(requireRole("super_admin"))
-
-systemSettingsRoute.get(
-  "/",
-  readSystemSettingsController,
-);
-
-systemSettingsRoute.post(
-  "/",
-  createSystemSettingController,
-);
-
-
+systemSettingsRoute.post("/", createSystemSettingController);
+systemSettingsRoute.get("/", readSystemSettingsController);
+systemSettingsRoute.get("/:id", readDetailSystemSettingController);
 
 export default systemSettingsRoute;

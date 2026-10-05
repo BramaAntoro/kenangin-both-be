@@ -15,11 +15,11 @@ export default async function readSystemSettingsController(
   response: Response,
 ): Promise<Response> {
   try {
-    const settings = await readSystemSettingsService();
+    const systemSsettings = await readSystemSettingsService();
 
     return apiSuccess(
       response,
-      { settings },
+      { systemSsettings },
       "System settings berhasil diambil",
     );
   } catch (error) {
