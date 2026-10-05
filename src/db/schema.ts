@@ -64,8 +64,8 @@ export interface PackageFeatures {
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: varchar("email").notNull().unique(),
-  passwordHash: varchar("password_hash"),
-  fullName: varchar("full_name").notNull(),
+  password: varchar("password").notNull(),
+  name: varchar("name").notNull(),
   role: userRoleEnum("role").notNull().default("cafe_admin"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),

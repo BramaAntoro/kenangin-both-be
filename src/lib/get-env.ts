@@ -17,3 +17,10 @@ export default function getEnv(key: string): string {
 
 export const HOST = getEnv("HOST");
 export const PORT = getEnv("PORT");
+
+export const NODE_ENV = getEnv("NODE_ENV")
+
+export const JWT_SECRET = getEnv("JWT_SECRET")
+export const AUTH_TOKEN_EXPIRES_IN_SECONDS = Number(getEnv("AUTH_TOKEN_EXPIRES_IN_SECONDS"))
+export const JWT_ISSUER = getEnv("JWT_ISSUER")
+export const JWT_AUDIENCE = getEnv("JWT_AUDIENCE")
