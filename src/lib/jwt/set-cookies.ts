@@ -1,6 +1,5 @@
 import type { Response } from "express";
-import { AUTH_TOKEN_EXPIRES_IN_SECONDS, NODE_ENV } from "../get-env.js";
-
+import { AUTH_COOKIE_NAME, AUTH_TOKEN_EXPIRES_IN_SECONDS, NODE_ENV } from "../get-env.js";
 
 /**
  * Menyimpan JWT ke dalam response sebagai cookie autentikasi.
@@ -17,7 +16,7 @@ export default function setCookies(
   response: Response,
   jwtToken: string,
 ): Response {
-  const cookies = response.cookie("jwt_token_kenangin_booth_user", jwtToken, {
+  const cookies = response.cookie(AUTH_COOKIE_NAME, jwtToken, {
     httpOnly: true,
     secure: NODE_ENV === "production",
     sameSite: "lax",
