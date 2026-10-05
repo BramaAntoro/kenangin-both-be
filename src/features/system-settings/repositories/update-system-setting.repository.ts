@@ -4,18 +4,26 @@ import { systemSettings } from "../../../db/schema.js";
 import type { SystemSettingResult } from "../types/system-setting-service-result.js";
 
 /**
- * Memperbarui system setting berdasarkan ID.
- *
- * @param data - Data system setting yang akan diperbarui.
- * @returns System setting yang diperbarui atau `undefined` jika tidak ditemukan.
+ * Data yang dibutuhkan repository untuk memperbarui system setting.
  */
-export default async function updateSystemSettingRepository(data: {
+type UpdateSystemSettingRepositoryData = {
   id: string;
   settingKey: string;
   settingValue: string;
   description: string | null;
   updatedBy: string;
-}): Promise<SystemSettingResult> {
+};
+
+
+/**
+ * Memperbarui system setting berdasarkan ID.
+ *
+ * @param data - Data system setting yang akan diperbarui.
+ * @returns System setting yang diperbarui atau `undefined` jika tidak ditemukan.
+ */
+export default async function updateSystemSettingRepository(
+  data: UpdateSystemSettingRepositoryData,
+): Promise<SystemSettingResult> {
   const [result] = await db
     .update(systemSettings)
     .set({
