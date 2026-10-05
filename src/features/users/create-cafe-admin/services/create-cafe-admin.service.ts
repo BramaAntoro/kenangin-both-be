@@ -30,11 +30,11 @@ export default async function createCafeAdminService(
     throw new AppError("Email sudah digunakan", 409);
   }
 
-  const password = await hashPassword(payload.password);
+  const hasedPassword = await hashPassword(payload.password);
   const user = await createCafeAdminRepository({
     email: payload.email,
     name: payload.name,
-    password,
+    hasedPassword,
   });
 
   return {
