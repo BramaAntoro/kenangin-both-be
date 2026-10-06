@@ -3,16 +3,7 @@ import type { CreateCafeDto } from "../dto/create-cafe.dto.js";
 import createCafeRepository from "../repositories/create-cafe.repository.js";
 import existsCafeSlugRepository from "../repositories/exists-cafe-slug.repository.js";
 import type { CreateCafeResult } from "../types/create-cafe-result.js";
-
-/** Membuat slug URL-safe dari nama cafe. */
-function createCafeSlug(name: string): string {
-  return name
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+import createCafeSlug from "../utils/create-cafe-slug.js";
 
 /**
  * Membuat cafe baru dan menghubungkannya dengan user cafe admin.
