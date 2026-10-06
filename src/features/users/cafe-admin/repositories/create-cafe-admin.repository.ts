@@ -1,6 +1,6 @@
 import { db } from "../../../../db/index.js";
 import { users } from "../../../../db/schema.js";
-import type { AuthUserResult } from "../../../auth/types/auth-user-result.js";
+import type { UserResult } from "../../../../types/users/user-result.js";
 
 type CreateCafeAdminData = {
   email: string;
@@ -14,7 +14,7 @@ type CreateCafeAdminData = {
  * @param data - Data user dengan password yang sudah di-hash.
  * @returns Data akun yang dibuat tanpa password.
  */
-export default async function createCafeAdminRepository(data: CreateCafeAdminData): Promise<AuthUserResult> {
+export default async function createCafeAdminRepository(data: CreateCafeAdminData): Promise<UserResult> {
   const [result] = await db
     .insert(users)
     .values({

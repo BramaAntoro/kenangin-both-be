@@ -1,8 +1,8 @@
 import AppError from "../../../../lib/app-error.js";
 import hashPassword from "../../../../lib/password/hash-password.js";
 import createCafeAdminRepository from "../repositories/create-cafe-admin.repository.js";
-import existingUserRepository from "../../../auth/repositories/existing-user.repository.js";
-import type { AuthUserResult } from "../../../auth/types/auth-user-result.js";
+import existsUserByEmailRepository from "../repositories/exists-user-by-email.repository.js";
+import type { UserResult } from "../../../../types/users/user-result.js";
 import type { CreateCafeAdminDto } from "../dto/create-cafe-admin.dto.js";
 
 /**
@@ -11,7 +11,7 @@ import type { CreateCafeAdminDto } from "../dto/create-cafe-admin.dto.js";
 type CreateCafeAdminServiceResult = {
   status: boolean;
   message: string;
-  user: AuthUserResult;
+  user: UserResult;
 };
 
 /**
@@ -24,16 +24,17 @@ type CreateCafeAdminServiceResult = {
 export default async function createCafeAdminService(
   payload: CreateCafeAdminDto,
 ): Promise<CreateCafeAdminServiceResult> {
-  const existingUser = await existingUserRepository(payload.email);
+  const { email, name, password } = payload;
+  const existingUser = await existsUserByEmailRepository(email);
 
   if (existingUser) {
     throw new AppError("Email sudah digunakan", 409);
   }
 
-  const hasedPassword = await hashPassword(payload.password);
+  const hasedPassword = await hashPassword(password);
   const user = await createCafeAdminRepository({
-    email: payload.email,
-    name: payload.name,
+    email,
+    name,
     hasedPassword,
   });
 

@@ -1,9 +1,9 @@
 import type { LoginDto } from "../dto/login.dto.js";
-import existingUserRepository from "../../repositories/existing-user.repository.js";
+import findUserByEmailRepository from "../repositories/find-user-by-email.repository.js";
 import AppError from "../../../../lib/app-error.js";
 import comparePassword from "../../../../lib/password/compare-password.js";
 import signToken from "../../../../lib/password/sign-token.js";
-import type { AuthUserResult } from "../../types/auth-user-result.js";
+import type { UserResult } from "../../../../types/users/user-result.js";
 
 /**
  * Format hasil response dari loginService.
@@ -11,7 +11,7 @@ import type { AuthUserResult } from "../../types/auth-user-result.js";
 type LoginServiceResult = {
   status: boolean;
   message: string;
-  user: AuthUserResult;
+  user: UserResult;
   jwtToken: string;
 };
 
@@ -29,7 +29,7 @@ export default async function loginService(
 ): Promise<LoginServiceResult> {
   const { email, password } = payload;
 
-  const existingUser = await existingUserRepository(email);
+  const existingUser = await findUserByEmailRepository(email);
   if (!existingUser) {
     throw new AppError(
       "Email atau password, periksa kembali data yang dimasukan",
