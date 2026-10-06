@@ -1,6 +1,6 @@
 import AppError from "../../../../lib/app-error.js";
 import hashPassword from "../../../../lib/password/hash-password.js";
-import createCafeAdminRepository from "../../repositories/create-cafe-admin.repository.js";
+import createCafeAdminRepository from "../repositories/create-cafe-admin.repository.js";
 import existingUserRepository from "../../../auth/repositories/existing-user.repository.js";
 import type { AuthUserResult } from "../../../auth/types/auth-user-result.js";
 import type { CreateCafeAdminDto } from "../dto/create-cafe-admin.dto.js";

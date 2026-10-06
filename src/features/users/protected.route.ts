@@ -1,5 +1,5 @@
 import { Router } from "express";
-import createCafeAdminRoute from "./create-cafe-admin/route.js";
+import createCafeAdminRoute from "./cafe-admin/route.js";
 
 /**
  * Router user untuk endpoint yang membutuhkan autentikasi.
