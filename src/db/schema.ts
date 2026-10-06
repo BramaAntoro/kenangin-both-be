@@ -84,10 +84,10 @@ export const systemSettings = pgTable("system_settings", {
 // Master Data Kafe Mitra B2B
 export const cafes = pgTable("cafes", {
   id: uuid("id").defaultRandom().primaryKey(),
-  name: varchar("name").notNull(),
+  name: varchar("name").notNull().unique(),
   slug: varchar("slug").notNull().unique(),
-  address: text("address"),
-  phone: varchar("phone"),
+  address: text("address").notNull(),
+  phone: varchar("phone").notNull(),
   cafeSharePercent: integer("cafe_share_percent").notNull().default(40),
   kenanginSharePercent: integer("kenangin_share_percent").notNull().default(60),
   isActive: boolean("is_active").default(true),

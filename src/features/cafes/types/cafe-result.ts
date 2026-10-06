@@ -3,8 +3,8 @@ export type CafeResult = {
   id: string;
   name: string;
   slug: string;
-  address: string | null;
-  phone: string | null;
+  address: string;
+  phone: string;
   cafeSharePercent: number;
   kenanginSharePercent: number;
   isActive: boolean | null;

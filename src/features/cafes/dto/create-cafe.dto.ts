@@ -8,7 +8,11 @@ export const createCafeSchema = z
       .trim()
       .min(1, "Nama cafe wajib diisi")
       .max(100, "Nama cafe maksimal 100 karakter"),
-    address: z.string().trim().max(500, "Alamat maksimal 500 karakter").optional(),
+    address: z
+      .string()
+      .trim()
+      .min(1, "Alamat wajib diisi")
+      .max(500, "Alamat maksimal 500 karakter"),
     phone: z
       .string()
       .trim()

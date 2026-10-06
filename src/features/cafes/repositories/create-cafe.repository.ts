@@ -9,8 +9,8 @@ import type { CreateCafeResult } from "../types/create-cafe-result.js";
 type CreateCafeRepositoryData = {
   name: string;
   slug: string;
-  address?: string | undefined;
-  phone?: string | undefined;
+  address: string;
+  phone: string;
   cafeSharePercent: number;
   kenanginSharePercent: number;
   cafeAdminId: string;
@@ -47,8 +47,8 @@ export default async function createCafeRepository(
       .values({
         name: data.name,
         slug: data.slug,
-        address: data.address ?? null,
-        phone: data.phone ?? null,
+        address: data.address,
+        phone: data.phone,
         cafeSharePercent: data.cafeSharePercent,
         kenanginSharePercent: data.kenanginSharePercent,
       })
