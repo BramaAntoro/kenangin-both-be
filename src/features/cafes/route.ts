@@ -1,6 +1,7 @@
 import { Router } from "express";
 import requireRole from "../../middlewares/role.middleware.js";
 import createCafeController from "./controllers/create-cafe.controller.js";
+import deleteCafeController from "./controllers/delete-cafe.controller.js";
 import readCafesController from "./controllers/read-cafes.controller.js";
 import updateCafeController from "./controllers/update-cafe.controller.js";
 
@@ -11,5 +12,6 @@ cafesRoute.use(requireRole("super_admin"));
 cafesRoute.post("/", createCafeController);
 cafesRoute.get("/", readCafesController);
 cafesRoute.put("/:id", updateCafeController);
+cafesRoute.delete("/:id", deleteCafeController);
 
 export default cafesRoute;
