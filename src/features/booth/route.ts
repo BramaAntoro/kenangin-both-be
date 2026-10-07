@@ -3,7 +3,7 @@ import packagesRouter from "./packages/route.js";
 
 const boothRoute = Router();
 
-boothRoute.use("/", packagesRouter);
+boothRoute.use("/packages", packagesRouter);
 
 export default boothRoute;
 

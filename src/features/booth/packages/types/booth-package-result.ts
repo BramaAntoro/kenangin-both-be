@@ -8,10 +8,9 @@ export type BoothPackageResult = {
   price: number;
   photoShotsCount: number;
   printCopiesCount: number;
-  features: Record<string, unknown>;
+  features: unknown;
   description: string | null;
   isActive: boolean | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 };
-
