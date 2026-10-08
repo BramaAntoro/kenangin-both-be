@@ -2,10 +2,9 @@ import z from "zod";
 import { packageFeaturesSchema } from "./package-features.dto.js";
 
 /**
- * Schema validasi untuk membuat paket booth baru.
- * `cafe_id` diambil dari JWT token, .
+ * Schema validasi data paket booth yang akan diperbarui.
  */
-export const createBoothPackageSchema = z.object({
+export const updateBoothPackageSchema = z.object({
   name: z
     .string()
     .trim()
@@ -28,11 +27,9 @@ export const createBoothPackageSchema = z.object({
     .string()
     .trim()
     .max(500, "Deskripsi maksimal 500 karakter")
-    .optional(),
+    .nullable().optional(),
+  isActive: z.boolean({ message: "isActive harus berupa boolean" }).optional(),
 });
 
-/**
- * Data paket booth yang sudah divalidasi.
- */
-export type CreateBoothPackageDto = z.infer<typeof createBoothPackageSchema>;
-
+/** Tipe data paket booth yang telah lolos validasi untuk operasi pembaruan. */
+export type UpdateBoothPackageDto = z.infer<typeof updateBoothPackageSchema>;

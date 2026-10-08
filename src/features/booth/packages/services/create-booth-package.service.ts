@@ -38,16 +38,7 @@ export default async function createBoothPackageService(
     throw new AppError("Akun Anda belum terhubung ke cafe manapun", 404);
   }
 
-  const minPriceSetting = await findMinPackagePriceRepository();
-  if (minPriceSetting) {
-    const minPrice = Number(minPriceSetting.settingValue);
-    if (!Number.isNaN(minPrice) && price < minPrice) {
-      throw new AppError(
-        `Harga paket di bawah batas minimal (Rp${minPrice}) `,
-        400,
-      );
-    }
-  }
+  await findMinPackagePriceRepository(price);
 
   const result = await createBoothPackageRepository({
     cafeId: cafeUser.cafeId,
