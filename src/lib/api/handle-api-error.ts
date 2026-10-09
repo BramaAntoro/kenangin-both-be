@@ -1,3 +1,4 @@
+import multer from "multer";
 import AppError from "../app-error.js";
 import { BodyValidationError } from "../errors/body-validation-error.js";
 
@@ -21,6 +22,15 @@ type HandleApiError = {
  * @returns Pesan dan HTTP status code untuk respons error.
  */
 export default function handleApiError(error: unknown): HandleApiError {
+  if (error instanceof multer.MulterError) {
+    return {
+      message: error.code === "LIMIT_FILE_SIZE"
+        ? "Ukuran file maksimal 5MB"
+        : "File upload tidak valid",
+      statusCode: 400,
+    };
+  }
+
   if (error instanceof BodyValidationError) {
     return {
       message: error.message,

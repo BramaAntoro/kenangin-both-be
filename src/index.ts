@@ -5,6 +5,7 @@ import apiRoute from "./route.js";
 const app = express();
 
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 app.use("/api", apiRoute);
 
 app.listen(Number(PORT), HOST, () => {
