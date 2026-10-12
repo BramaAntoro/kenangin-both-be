@@ -1,10 +1,10 @@
-import { unlink } from "node:fs/promises";
 import type { Request, Response } from "express";
 import { apiError, apiSuccess } from "../../../../lib/api/api-response.js";
 import handleApiError from "../../../../lib/api/handle-api-error.js";
 import createFrameService from "../services/create-frame.service.js";
 import { createFrameSchema } from "../dto/create-frame.dto.js";
 import parseAndValidateBody from "../../../../lib/api/parse-and-validate-body.js";
+import { removeUploadedFile } from "../../../../lib/multer/remove-uploaded-file.js";
 
 /**
  * Membuat frame baru dari PNG yang telah diunggah.
@@ -39,7 +39,8 @@ export default async function createFrameController(
 
     return apiSuccess(response, { frame }, "Frame berhasil dibuat", 201);
   } catch (error) {
-    await unlink(uploadedFile.path).catch(() => undefined);
+    await removeUploadedFile(uploadedFile.path);
+
     const { message, statusCode, details } = handleApiError(error);
     return apiError(response, message, statusCode, details);
   }

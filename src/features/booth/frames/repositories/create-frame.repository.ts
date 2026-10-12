@@ -16,7 +16,6 @@ export default async function createFrameRepository(
     frameUrl: input.frameUrl,
     maxPhotosSlot: input.maxPhotosSlot,
     cafeId: input.cafeId,
-    isActive: true,
   }).returning();
   return frame;
 }

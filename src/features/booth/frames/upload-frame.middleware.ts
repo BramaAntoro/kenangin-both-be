@@ -1,16 +1,12 @@
-import { mkdirSync } from "node:fs";
-import { readFile, unlink } from "node:fs/promises";
-import { join } from "node:path";
+import { readFile } from "node:fs/promises";
 import multer from "multer";
 import type { NextFunction, Request, Response } from "express";
 import { apiError } from "../../../lib/api/api-response.js";
 import handleApiError from "../../../lib/api/handle-api-error.js";
 import AppError from "../../../lib/app-error.js";
+import { removeUploadedFile } from "../../../lib/multer/remove-uploaded-file.js";
+import { uploadDirectory } from "./frame-file.js";
 import { hasPngTransparency } from "./png-transparency.js";
-
-/** Direktori penyimpanan file PNG frame. */
-export const uploadDirectory = join(process.cwd(), "uploads", "frames");
-mkdirSync(uploadDirectory, { recursive: true });
 
 /** Mengubah judul frame menjadi bagian nama file yang aman. */
 function sanitizeFilenamePart(value: string): string {
@@ -65,6 +61,49 @@ const uploadSingleFile = multer({
   },
 }).single("file");
 
+/** Membuat middleware upload dengan kewajiban file yang dapat dikonfigurasi. */
+function createUploadFrameMiddleware(required: boolean) {
+  return function uploadFrameMiddleware(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ): void {
+    uploadSingleFile(request, response, async (error: unknown) => {
+      if (error) {
+        const { message, statusCode, details } = handleApiError(error);
+        apiError(response, message, statusCode, details);
+        return;
+      }
+
+      if (!request.file) {
+        if (required) apiError(response, "File PNG wajib diunggah", 400);
+        else next();
+        return;
+      }
+
+      let validTransparentPng = false;
+      try {
+        validTransparentPng = hasPngTransparency(
+          await readFile(request.file.path),
+        );
+      } catch {
+        validTransparentPng = false;
+      }
+      if (!validTransparentPng) {
+        await removeUploadedFile(request.file.path);
+        apiError(
+          response,
+          "File harus berupa PNG valid dengan transparansi",
+          400,
+        );
+        return;
+      }
+
+      next();
+    });
+  };
+}
+
 /**
  * Mengunggah satu PNG frame pada field `file`.
  *
@@ -75,35 +114,6 @@ const uploadSingleFile = multer({
  * @param response - Response Express untuk error upload.
  * @param next - Meneruskan request setelah file lolos seluruh validasi.
  */
-export default function uploadFrame(
-  request: Request,
-  response: Response,
-  next: NextFunction,
-): void {
-  uploadSingleFile(request, response, async (error: unknown) => {
-    if (error) {
-      const { message, statusCode, details } = handleApiError(error);
-      apiError(response, message, statusCode, details);
-      return;
-    }
+export const uploadFrameOptional = createUploadFrameMiddleware(false);
 
-    if (!request.file) {
-      apiError(response, "File PNG wajib diunggah", 400);
-      return;
-    }
-
-    let validTransparentPng = false;
-    try {
-      validTransparentPng = hasPngTransparency(await readFile(request.file.path));
-    } catch {
-      validTransparentPng = false;
-    }
-    if (!validTransparentPng) {
-      await unlink(request.file.path).catch(() => undefined);
-      apiError(response, "File harus berupa PNG valid dengan transparansi", 400);
-      return;
-    }
-
-    next();
-  });
-}
+export default createUploadFrameMiddleware(true);

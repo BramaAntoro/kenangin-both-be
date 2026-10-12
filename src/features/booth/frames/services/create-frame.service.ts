@@ -2,6 +2,7 @@ import AppError from "../../../../lib/app-error.js";
 import findCafeIdByUserIdRepository from "../../repositories/find-cafe-id-by-user-id.repository.js";
 import createFrameRepository from "../repositories/create-frame.repository.js";
 import type { CreateFrameDto } from "../dto/create-frame.dto.js";
+import { getFrameUrl } from "../frame-file.js";
 
 /**
  * Membuat frame global atau frame milik cafe.
@@ -23,7 +24,7 @@ export default async function createFrameService(
   frameFilename: string,
 ) {
   const { title, maxPhotosSlot, cafeId } = payload;
-  const frameUrl = `/uploads/frames/${frameFilename}`;
+  const frameUrl = getFrameUrl(frameFilename);
 
   let frameCafeId: string | null;
   if (role === "super_admin") {
@@ -32,16 +33,17 @@ export default async function createFrameService(
     if (!cafeId) throw new AppError("cafe_id wajib diisi", 400);
 
     const cafe = await findCafeIdByUserIdRepository(userId, cafeId);
-    if (!cafe)
-      throw new AppError("Cafe tersebut tidak ada", 403);
+    if (!cafe) throw new AppError("Cafe tersebut tidak ada", 403);
 
     frameCafeId = cafe.cafeId;
   }
 
-  return createFrameRepository({
+  const result = await createFrameRepository({
     title,
     frameUrl,
     maxPhotosSlot,
     cafeId: frameCafeId,
   });
+
+  return result;
 }
