@@ -2,6 +2,7 @@ import { Router } from "express";
 import requireRole from "../../../middlewares/role.middleware.js";
 import uploadFrame, { uploadFrameOptional } from "./upload-frame.middleware.js";
 import createFrameController from "./controllers/create-frame.controller.js";
+import deleteFrameController from "./controllers/delete-frame.controller.js";
 import readFramesController from "./controllers/read-frames.controller.js";
 import updateFrameController from "./controllers/update-frame.controller.js";
 
@@ -23,6 +24,11 @@ framesRouter.put(
   requireRole("cafe_admin", "super_admin"),
   uploadFrameOptional,
   updateFrameController,
+);
+framesRouter.delete(
+  "/:id",
+  requireRole("cafe_admin", "super_admin"),
+  deleteFrameController,
 );
 
 export default framesRouter;
