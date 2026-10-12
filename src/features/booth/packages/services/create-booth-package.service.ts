@@ -1,7 +1,7 @@
 import AppError from "../../../../lib/app-error.js";
 import type { CreateBoothPackageDto } from "../dto/create-booth-package.dto.js";
 import createBoothPackageRepository from "../repositories/create-booth-package.repository.js";
-import findCafeIdByUserIdRepository from "../repositories/find-cafe-id-by-user-id.repository.js";
+import findCafeIdByUserIdRepository from "../../repositories/find-cafe-id-by-user-id.repository.js";
 import findMinPackagePriceRepository from "../repositories/find-min-package-price.repository.js";
 import type { BoothPackageResult } from "../types/booth-package-result.js";
 
