@@ -5,7 +5,11 @@ const parseBoolean = z.preprocess(
   z.boolean(),
 );
 
-/** Schema partial untuk field frame yang dapat diperbarui lewat multipart. */
+/**
+ * Schema body multipart untuk pembaruan frame.
+ *
+ * Nilai `is_active` dapat diterima sebagai boolean atau string boolean.
+ */
 export const updateFrameSchema = z.object({
   title: z.string().trim().min(1, "title tidak boleh kosong"),
   maxPhotosSlot: z.coerce

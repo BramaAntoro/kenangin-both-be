@@ -7,7 +7,16 @@ import parseParams from "../../../../lib/api/parse-params.js";
 import { updateFrameSchema } from "../dto/update-frame.dto.js";
 import updateFrameService from "../services/update-frame.service.js";
 
-/** Memproses penggantian data frame dengan file PNG opsional. */
+/**
+ * Memproses pembaruan data frame melalui endpoint HTTP.
+ *
+ * Controller membaca ID frame dari parameter URL, memvalidasi body multipart,
+ * lalu meneruskan pembaruan serta file PNG opsional ke service.
+ *
+ * @param request - Request Express dengan parameter `id`, body pembaruan, dan file opsional.
+ * @param response - Response Express untuk hasil pembaruan atau error.
+ * @returns Response HTTP berisi frame yang telah diperbarui.
+ */
 export default async function updateFrameController(
   request: Request,
   response: Response,

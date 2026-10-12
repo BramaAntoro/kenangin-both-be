@@ -3,7 +3,16 @@ import { db } from "../../../../db/index.js";
 import { frames } from "../../../../db/schema.js";
 import type { UpdateFrameDto } from "../dto/update-frame.dto.js";
 
-/** Memperbarui field frame yang dikirim beserta URL file jika diganti. */
+/**
+ * Memperbarui field frame yang dikirim beserta URL file jika diganti.
+ *
+ * Field yang tidak dikirim tetap memakai nilai lama. Timestamp pembaruan
+ * selalu diubah saat record ditemukan.
+ *
+ * @param frameId - ID frame yang akan diperbarui.
+ * @param data - Field frame baru dan URL file PNG opsional.
+ * @returns Record frame yang telah diperbarui, atau `undefined` jika tidak ditemukan.
+ */
 export default async function updateFrameRepository(
   frameId: string,
   data: UpdateFrameDto & { frameUrl?: string },

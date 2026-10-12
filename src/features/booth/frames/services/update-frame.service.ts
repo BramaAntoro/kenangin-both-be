@@ -14,7 +14,7 @@ import updateFrameRepository from "../repositories/update-frame.repository.js";
  * @param frameId - ID frame yang akan diperbarui.
  * @param userId - ID user dari JWT.
  * @param role - Role user dari JWT.
- * @param payload - Seluruh data frame yang telah tervalidasi.
+ * @param payload - Data frame yang telah tervalidasi.
  * @param frameFilename - Nama file baru jika ada PNG yang diunggah.
  * @returns Data frame setelah diperbarui.
  * @throws {AppError} Jika frame tidak ditemukan atau user tidak memiliki akses.
