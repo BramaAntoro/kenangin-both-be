@@ -25,3 +25,6 @@ export const AUTH_TOKEN_EXPIRES_IN_SECONDS = Number(getEnv("AUTH_TOKEN_EXPIRES_I
 export const JWT_ISSUER = getEnv("JWT_ISSUER")
 export const JWT_AUDIENCE = getEnv("JWT_AUDIENCE")
 export const AUTH_COOKIE_NAME = getEnv("AUTH_COOKIE_NAME")
+
+export const MIDTRANS_CLIENT_KEY = getEnv("MIDTRANS_CLIENT_KEY");
+export const MIDTRANS_SERVER_KEY = getEnv("MIDTRANS_SERVER_KEY")
