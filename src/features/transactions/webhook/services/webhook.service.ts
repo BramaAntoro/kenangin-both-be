@@ -1,12 +1,14 @@
 import { MIDTRANS_SERVER_KEY } from "../../../../lib/get-env.js";
 import crypto from "node:crypto";
+import { db } from "../../../../db/index.js";
 import type { MidtransWebhookDto } from "../dto/midtrans-snap-webhook.dto.js";
 import AppError from "../../../../lib/app-error.js";
 import updateTransactionRepository from "../repositories/update-transaction.repository.js";
+import createSessionRepository from "../repositories/create-session.repository.js";
 
 /**
- * Memvalidasi signature webhook Midtrans dan memperbarui status pembayaran
- * transaksi yang didukung.
+ * Memvalidasi signature webhook Midtrans, memperbarui transaksi, dan membuat
+ * sesi saat pembayaran berhasil.
  *
  * @param payload - Data notifikasi pembayaran dari Midtrans.
  * @returns Transaksi yang diperbarui, atau `null` untuk status yang tidak perlu
@@ -51,10 +53,21 @@ export default async function webhookService(payload: MidtransWebhookDto) {
 
   if (!paymentStatus) return null;
 
-  const transaction = await updateTransactionRepository(orderId, {
-    paymentStatus, paymentType
-  });
-  if (!transaction) throw new AppError("Transaksi tidak ditemukan", 404);
+  return db.transaction(async (tx) => {
+    const transaction = await updateTransactionRepository(orderId, {
+      paymentStatus,
+      paymentType,
+    }, tx);
+    if (!transaction) throw new AppError("Transaksi tidak ditemukan", 404);
 
-  return transaction;
+    if (paymentStatus === "settlement") {
+      await createSessionRepository(
+        transaction.id,
+        crypto.randomUUID(),
+        tx,
+      );
+    }
+
+    return transaction;
+  });
 }

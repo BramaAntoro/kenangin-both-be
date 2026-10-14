@@ -187,7 +187,6 @@ export const sessions = pgTable("sessions", {
     .unique()
     .references(() => boothTransactions.id),
   frameId: uuid("frame_id")
-    .notNull()
     .references(() => frames.id),
   sessionCode: varchar("session_code").notNull().unique(),
   printStatus: printStatusEnum("print_status").default("pending"),
