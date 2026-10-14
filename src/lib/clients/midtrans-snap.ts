@@ -12,28 +12,17 @@ const snap = new midtransClient.Snap({
 
 /** Parameter transaksi yang dikirim ke Midtrans Snap. */
 type CreateSnapTransactionParams = {
-  /** ID order unik yang dikirim ke Midtrans. */
   orderId: string;
-  /** Nilai total transaksi dalam rupiah. */
   grossAmount: number;
-  /** Data customer yang ditampilkan pada transaksi Midtrans. */
   customer: {
-    /** Nama depan customer. */
     firstName: string;
-    /** Email customer. */
     email: string;
-    /** Nomor telepon customer jika tersedia. */
     phone?: string;
   };
-  /** Rincian item yang ditampilkan pada transaksi. */
   items?: Array<{
-    /** ID item. */
     id: string;
-    /** Nama item. */
     name: string;
-    /** Harga per item dalam rupiah. */
     price: number;
-    /** Jumlah item. */
     quantity: number;
   }>;
 };
@@ -48,7 +37,6 @@ export default async function createMidtransSnap(
   params: CreateSnapTransactionParams,
 ): Promise<string> {
   const parameter = {
-    enabled_payments: ["qris"],
     transaction_details: {
       order_id: params.orderId,
       gross_amount: params.grossAmount,

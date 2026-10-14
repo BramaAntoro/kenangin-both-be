@@ -89,7 +89,6 @@ export default async function transactionInitiateService(
         rndAmount,
         profitAmount,
         paymentStatus: "pending",
-        paymentType: "qris",
         snapToken: snapTokenMidtrans,
       },
       tx,
