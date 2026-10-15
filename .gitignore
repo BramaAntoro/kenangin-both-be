@@ -1,0 +1,7 @@
+.env
+
+node_modules/
+uploads/frames/*
+!uploads/frames/.gitkeep
+uploads/photos/*
+!uploads/photos/.gitkeep
