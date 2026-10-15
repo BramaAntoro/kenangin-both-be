@@ -34,6 +34,7 @@ export const kioskStatusEnum = pgEnum("kiosk_status", [
 export const printStatusEnum = pgEnum("print_status", [
   "pending",
   "printed",
+  "not printed",
   "failed",
 ]);
 
