@@ -23,7 +23,7 @@ export default async function webhookService(payload: MidtransWebhookDto) {
     signatureKey,
     transactionStatus,
     fraudStatus,
-    paymentType
+    paymentType,
   } = payload;
 
   const hash = crypto
@@ -54,16 +54,20 @@ export default async function webhookService(payload: MidtransWebhookDto) {
   if (!paymentStatus) return null;
 
   return db.transaction(async (tx) => {
-    const transaction = await updateTransactionRepository(orderId, {
-      paymentStatus,
-      paymentType,
-    }, tx);
+    const transaction = await updateTransactionRepository(
+      orderId,
+      {
+        paymentStatus,
+        paymentType,
+      },
+      tx,
+    );
     if (!transaction) throw new AppError("Transaksi tidak ditemukan", 404);
 
     if (paymentStatus === "settlement") {
       await createSessionRepository(
         transaction.id,
-        crypto.randomUUID(),
+        `KNG-${crypto.randomBytes(3).toString("hex").toUpperCase()}`,
         tx,
       );
     }

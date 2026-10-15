@@ -190,11 +190,7 @@ export const sessions = pgTable("sessions", {
     .references(() => frames.id),
   sessionCode: varchar("session_code").notNull().unique(),
   printStatus: printStatusEnum("print_status").default("pending"),
-
-  guestEmail: varchar("guest_email"),
-  finalDriveUrl: text("final_drive_url"),
-  emailSentAt: timestamp("email_sent_at", { withTimezone: true }),
-
+  softfileUrl: text("softfile_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
