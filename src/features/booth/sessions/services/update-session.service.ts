@@ -1,7 +1,7 @@
 import AppError from "../../../../lib/app-error.js";
 import type { UpdateSessionDto } from "../dto/update-session.dto.js";
-import { readSession } from "../repositories/read-session-by-sessioncode.repository.js";
-import { default as updateSession } from "../repositories/update-session.repository.js";
+import { readSessionRepository } from "../repositories/read-session-by-sessioncode.repository.js";
+import  updateSessionRepository  from "../repositories/update-session.repository.js";
 import { getPhotoUrl } from "../photo-file.js";
 
 /**
@@ -18,7 +18,7 @@ export default async function updateSessionService(
   changes: UpdateSessionDto,
   hasPhoto: boolean,
 ) {
-  const isSecction = await readSession(sessionCode)
+  const isSecction = await readSessionRepository(sessionCode)
   if (!isSecction)
     throw new AppError("Session tidak ditemukan", 404);
   
@@ -26,7 +26,7 @@ export default async function updateSessionService(
     throw new AppError("Minimal satu field wajib dikirim", 400);
   }
 
-  const session = await updateSession(sessionCode, {
+  const session = await updateSessionRepository(sessionCode, {
     ...changes,
     ...(hasPhoto ? { softfileUrl: getPhotoUrl(`${sessionCode}.jpg`) } : {}),
   });

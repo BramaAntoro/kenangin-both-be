@@ -10,7 +10,7 @@ import type { UpdateSessionDto } from "../dto/update-session.dto.js";
  * @param changes - Field database yang akan diubah.
  * @returns Data sesi yang diperbarui atau `undefined` jika tidak ditemukan.
  */
-export default async function updateSession(
+export default async function updateSessionRepository(
   sessionCode: string,
   changes: Partial<UpdateSessionDto> & { softfileUrl?: string },
 ) {
