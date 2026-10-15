@@ -34,6 +34,7 @@ export const kioskStatusEnum = pgEnum("kiosk_status", [
 export const printStatusEnum = pgEnum("print_status", [
   "pending",
   "printed",
+  "not printed",
   "failed",
 ]);
 
@@ -187,15 +188,10 @@ export const sessions = pgTable("sessions", {
     .unique()
     .references(() => boothTransactions.id),
   frameId: uuid("frame_id")
-    .notNull()
     .references(() => frames.id),
   sessionCode: varchar("session_code").notNull().unique(),
   printStatus: printStatusEnum("print_status").default("pending"),
-
-  guestEmail: varchar("guest_email"),
-  finalDriveUrl: text("final_drive_url"),
-  emailSentAt: timestamp("email_sent_at", { withTimezone: true }),
-
+  softfileUrl: text("softfile_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
