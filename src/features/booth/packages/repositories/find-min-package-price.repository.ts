@@ -7,10 +7,9 @@ import AppError from "../../../../lib/app-error.js";
  * Mengambil nilai `min_package_price` dari tabel `system_settings` dan
  * memastikan harga paket memenuhi batas minimum yang dikonfigurasi.
  *
- * Setting yang tidak ada atau nilainya bukan angka akan dilewati.
- *
  * @param price - Harga paket yang akan divalidasi.
- * @throws {AppError} Jika harga berada di bawah batas minimum.
+ * @throws {AppError} 404 jika pengaturan batas minimal harga tidak ditemukan.
+ * @throws {AppError} 400 jika nilai pengaturan tidak valid (NaN) atau harga berada di bawah batas minimum.
  */
 export default async function findMinPackagePriceRepository(
   price: number,
@@ -20,10 +19,17 @@ export default async function findMinPackagePriceRepository(
     .from(systemSettings)
     .where(eq(systemSettings.settingKey, "min_package_price"));
 
-  if (!result) return;
+  if (!result) {
+    throw new AppError("Pengaturan batas minimal harga paket tidak ditemukan", 404);
+  }
 
   const minPrice = Number(result.settingValue);
-  if (!Number.isNaN(minPrice) && price < minPrice) {
+  if (result.settingValue?.trim() === "" || Number.isNaN(minPrice)) {
+    throw new AppError("Nilai batas minimal harga paket tidak valid", 400);
+  }
+
+  if (price < minPrice) {
     throw new AppError(`Harga paket di bawah batas minimal (Rp${minPrice})`, 400);
   }
 }
+

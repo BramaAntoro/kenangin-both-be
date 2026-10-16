@@ -16,8 +16,8 @@ import type { BoothPackageResult } from "../types/booth-package-result.js";
  * @param userId - ID user dari JWT payload.
  * @param payload - Data paket yang sudah divalidasi Zod.
  * @returns Data paket booth yang berhasil dibuat.
- * @throws {AppError} 404 jika user tidak terhubung ke cafe manapun.
- * @throws {AppError} 400 jika harga di bawah batas minimal platform.
+ * @throws {AppError} 404 jika user tidak terhubung ke cafe manapun atau pengaturan harga tidak ditemukan.
+ * @throws {AppError} 400 jika harga di bawah batas minimal platform atau pengaturan harga tidak valid.
  * @throws {AppError} 500 jika penyimpanan gagal.
  */
 export default async function createBoothPackageService(
