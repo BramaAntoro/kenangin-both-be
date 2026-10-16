@@ -6,6 +6,7 @@ import systemSettingsRoute from "../features/system-settings/route.js";
 import cafesRoute from "../features/cafes/route.js";
 import kiosksRoute from "../features/kiosks/route.js";
 import boothPackagesRoute from "../features/booth/route.js";
+import reportsRoute from "../features/reports/route.js";
 
 /**
  * Router untuk endpoint yang membutuhkan autentikasi.
@@ -22,5 +23,6 @@ protectedRoute.use("/system-settings", systemSettingsRoute);
 protectedRoute.use("/cafes", cafesRoute);
 protectedRoute.use("/kiosks", kiosksRoute);
 protectedRoute.use("/booth", boothPackagesRoute);
+protectedRoute.use("/reports", reportsRoute);
 
 export default protectedRoute;
