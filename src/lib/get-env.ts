@@ -28,3 +28,5 @@ export const AUTH_COOKIE_NAME = getEnv("AUTH_COOKIE_NAME")
 
 export const MIDTRANS_CLIENT_KEY = getEnv("MIDTRANS_CLIENT_KEY");
 export const MIDTRANS_SERVER_KEY = getEnv("MIDTRANS_SERVER_KEY")
+
+export const FRONTEND_ORIGIN = getEnv("FRONTEND_ORIGIN")

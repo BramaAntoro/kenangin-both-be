@@ -1,9 +1,11 @@
 import express from "express";
 import { HOST, PORT } from "./lib/get-env.js";
+import corsMiddleware from "./middlewares/cors.middleware.js";
 import apiRoute from "./route.js";
 
 const app = express();
 
+app.use(corsMiddleware);
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 app.use("/api", apiRoute);
