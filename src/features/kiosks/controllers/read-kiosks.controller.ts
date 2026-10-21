@@ -4,6 +4,7 @@ import handleApiError from "../../../lib/api/handle-api-error.js";
 import AppError from "../../../lib/app-error.js";
 import parseParams from "../../../lib/api/parse-params.js";
 import readKiosksService from "../services/read-kiosks.service.js";
+import { readPaginatedKiosksRepository } from "../repositories/read-kiosks.repository.js";
 
 /**
  * Menangani pengambilan data kiosk yang dikelompokkan berdasarkan nama cafe.
@@ -17,6 +18,32 @@ export default async function readKiosksController(
   response: Response,
 ): Promise<Response> {
   try {
+    if (request.user?.role === "super_admin" && Object.keys(request.query).length) {
+      const page = Math.max(Number(request.query.page) || 1, 1);
+      const limit = Math.min(Math.max(Number(request.query.limit) || 5, 1), 50);
+      const search =
+        typeof request.query.search === "string" && request.query.search.trim()
+          ? request.query.search.trim()
+          : undefined;
+      const { kiosks, totalItems } = await readPaginatedKiosksRepository({
+        page,
+        limit,
+        search,
+      });
+
+      return apiSuccess(
+        response,
+        { kiosks },
+        "Daftar kiosk berhasil diambil",
+        200,
+        {
+          currentPage: page,
+          perPage: limit,
+          totalItems,
+          totalPages: Math.ceil(totalItems / limit),
+        },
+      );
+    }
 
     const result = await readKiosksService(request.user!);
 
