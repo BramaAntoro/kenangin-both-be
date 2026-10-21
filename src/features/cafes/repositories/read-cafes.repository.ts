@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { db } from "../../../db/index.js";
 import { cafeUsers, cafes, users } from "../../../db/schema.js";
 import type { CafeResult } from "../types/cafe-result.js";
@@ -9,12 +9,39 @@ export type ReadCafeResult = {
   cafeAdmin: string;
 };
 
+export type ReadCafesParams = {
+  page: number;
+  limit: number;
+  search?: string | undefined;
+};
+
+export type ReadCafesResult = {
+  rows: ReadCafeResult[];
+  totalItems: number;
+};
+
 /**
  * Mengambil seluruh cafe beserta admin cafe yang terhubung.
  *
  * @returns Daftar cafe dengan data admin berupa ID dan nama.
  */
-export default async function readCafesRepository(): Promise<ReadCafeResult[]> {
+export default async function readCafesRepository({
+  page,
+  limit,
+  search,
+}: ReadCafesParams): Promise<ReadCafesResult> {
+  const searchCondition = search
+    ? or(ilike(cafes.name, `%${search}%`), ilike(cafes.address, `%${search}%`))
+    : undefined;
+  const offset = (page - 1) * limit;
+
+  const [countResult] = await db
+    .select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
+    .from(cafes)
+    .innerJoin(cafeUsers, eq(cafeUsers.cafeId, cafes.id))
+    .innerJoin(users, and(eq(users.id, cafeUsers.userId), eq(users.role, "cafe_admin")))
+    .where(searchCondition);
+
   const results = await db
     .select({
       cafe: cafes,
@@ -31,10 +58,16 @@ export default async function readCafesRepository(): Promise<ReadCafeResult[]> {
         eq(users.role, "cafe_admin"),
       ),
     )
-    .orderBy(desc(cafes.createdAt));
+    .where(searchCondition)
+    .orderBy(desc(cafes.createdAt))
+    .limit(limit)
+    .offset(offset);
 
-  return results.map(({ cafe, cafeAdmin }) => ({
-    cafe,
-    cafeAdmin: cafeAdmin.name,
-  }));
+  return {
+    rows: results.map(({ cafe, cafeAdmin }) => ({
+      cafe,
+      cafeAdmin: cafeAdmin.name,
+    })),
+    totalItems: countResult?.count ?? 0,
+  };
 }

@@ -11,13 +11,19 @@ import readCafesService from "../services/read-cafes.service.js";
  * @returns Promise yang menghasilkan response JSON daftar cafe.
  */
 export default async function readCafesController(
-  _request: Request,
+  request: Request,
   response: Response,
 ): Promise<Response> {
   try {
-    const cafeResults = await readCafesService();
+    const page = Math.max(Number(request.query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(request.query.limit) || 5, 1), 50);
+    const search =
+      typeof request.query.search === "string" && request.query.search.trim()
+        ? request.query.search.trim()
+        : undefined;
+    const { rows, totalItems } = await readCafesService({ page, limit, search });
     const cafes = Object.fromEntries(
-      cafeResults.map(({ cafe, cafeAdmin }) => [
+      rows.map(({ cafe, cafeAdmin }) => [
         cafe.name,
         {
           ...cafe,
@@ -26,7 +32,18 @@ export default async function readCafesController(
       ]),
     );
 
-    return apiSuccess(response, { cafes }, "Daftar cafe berhasil diambil");
+    return apiSuccess(
+      response,
+      { cafes },
+      "Daftar cafe berhasil diambil",
+      200,
+      {
+        currentPage: page,
+        perPage: limit,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+      },
+    );
   } catch (error) {
     const { message, statusCode, details } = handleApiError(error);
     return apiError(response, message, statusCode, details);

@@ -1,5 +1,6 @@
 import readCafesRepository, {
-  type ReadCafeResult,
+  type ReadCafesParams,
+  type ReadCafesResult,
 } from "../repositories/read-cafes.repository.js";
 
 /**
@@ -7,6 +8,8 @@ import readCafesRepository, {
  *
  * @returns Daftar cafe dan data admin cafe.
  */
-export default async function readCafesService(): Promise<ReadCafeResult[]> {
-  return readCafesRepository();
+export default async function readCafesService(
+  query: ReadCafesParams,
+): Promise<ReadCafesResult> {
+  return readCafesRepository(query);
 }
