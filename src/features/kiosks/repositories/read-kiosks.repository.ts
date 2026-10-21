@@ -1,4 +1,4 @@
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "../../../db/index.js";
 import { cafeUsers, cafes, kiosks } from "../../../db/schema.js";
 import type { KioskResult } from "../types/kiosk-result.js";
@@ -20,6 +20,7 @@ export type ReadKiosksRow = {
  */
 export default async function readKiosksRepository(
   userId?: string,
+  cafeId?: string,
 ): Promise<ReadKiosksRow[]> {
   if (userId) {
     return db
@@ -31,17 +32,22 @@ export default async function readKiosksRepository(
       .from(cafes)
       .innerJoin(cafeUsers, eq(cafeUsers.cafeId, cafes.id))
       .leftJoin(kiosks, eq(kiosks.cafeId, cafes.id))
-      .where(eq(cafeUsers.userId, userId))
+      .where(cafeId
+        ? and(eq(cafeUsers.userId, userId), eq(cafes.id, cafeId))
+        : eq(cafeUsers.userId, userId))
       .orderBy(asc(cafes.name), desc(kiosks.createdAt));
   }
 
-  return db
+  const query = db
     .select({
       id: cafes.id,
       cafeName: cafes.name,
       kiosk: kiosks,
     })
     .from(cafes)
-    .leftJoin(kiosks, eq(kiosks.cafeId, cafes.id))
-    .orderBy(asc(cafes.name), desc(kiosks.createdAt));
+    .leftJoin(kiosks, eq(kiosks.cafeId, cafes.id));
+
+  return cafeId
+    ? query.where(eq(cafes.id, cafeId)).orderBy(asc(cafes.name), desc(kiosks.createdAt))
+    : query.orderBy(asc(cafes.name), desc(kiosks.createdAt));
 }

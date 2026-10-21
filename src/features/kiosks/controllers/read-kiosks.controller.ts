@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { apiError, apiSuccess } from "../../../lib/api/api-response.js";
 import handleApiError from "../../../lib/api/handle-api-error.js";
 import AppError from "../../../lib/app-error.js";
+import parseParams from "../../../lib/api/parse-params.js";
 import readKiosksService from "../services/read-kiosks.service.js";
 
 /**
@@ -20,6 +21,22 @@ export default async function readKiosksController(
     const result = await readKiosksService(request.user!);
 
     return apiSuccess(response, result, "Daftar kiosk berhasil diambil");
+  } catch (error) {
+    const { message, statusCode, details } = handleApiError(error);
+    return apiError(response, message, statusCode, details);
+  }
+}
+
+export async function readCafeKiosksController(
+  request: Request,
+  response: Response,
+): Promise<Response> {
+  try {
+    const cafeId = parseParams(request.params.cafeId);
+    const grouped = await readKiosksService(request.user!, cafeId);
+    const kiosks = Object.values(grouped).flat();
+
+    return apiSuccess(response, { kiosks }, "Daftar kiosk cafe berhasil diambil");
   } catch (error) {
     const { message, statusCode, details } = handleApiError(error);
     return apiError(response, message, statusCode, details);

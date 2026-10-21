@@ -5,6 +5,7 @@ import createCafeController from "./controllers/create-cafe.controller.js";
 import deleteCafeController from "./controllers/delete-cafe.controller.js";
 import readCafesController from "./controllers/read-cafes.controller.js";
 import updateCafeController from "./controllers/update-cafe.controller.js";
+import { readCafeKiosksController } from "../kiosks/controllers/read-kiosks.controller.js";
 
 const cafesRoute = Router();
 
@@ -14,6 +15,11 @@ cafesRoute.get(
   "/packages/:cafeId",
   requireRole("super_admin", "cafe_admin"),
   readBoothPackageCafeController,
+);
+cafesRoute.get(
+  "/kiosks/:cafeId",
+  requireRole("super_admin", "cafe_admin"),
+  readCafeKiosksController,
 );
 cafesRoute.put("/:id", requireRole("super_admin"), updateCafeController);
 cafesRoute.delete("/:id", requireRole("super_admin"), deleteCafeController);

@@ -1,3 +1,4 @@
+import AppError from "../../../lib/app-error.js";
 import type { JwtTokenPayload } from "../../../types/jwt/jwt-token-payload.js";
 import readKiosksRepository from "../repositories/read-kiosks.repository.js";
 import type { ReadKiosksResult } from "../types/read-kiosks-result.js";
@@ -13,9 +14,11 @@ import type { ReadKiosksResult } from "../types/read-kiosks-result.js";
  */
 export default async function readKiosksService(
   user: JwtTokenPayload,
+  cafeId?: string,
 ): Promise<ReadKiosksResult> {
   const userId = user.role === "cafe_admin" ? user.id : undefined;
-  const rows = await readKiosksRepository(userId);
+  const rows = await readKiosksRepository(userId, cafeId);
+  if (cafeId && rows.length === 0) throw new AppError("Cafe tidak ditemukan", 404);
 
   const grouped: ReadKiosksResult = {};
 
