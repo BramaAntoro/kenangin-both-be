@@ -1,6 +1,8 @@
-import { desc, eq, inArray, isNull, or } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import { db } from "../../../../db/index.js";
 import { cafes, frames } from "../../../../db/schema.js";
+
+type ReadFramesPagination = { page: number; limit: number; search?: string };
 
 /**
  * Mengambil frame beserta nama cafe pemiliknya.
@@ -12,20 +14,32 @@ import { cafes, frames } from "../../../../db/schema.js";
  * @param cafeIds - Daftar ID cafe yang menjadi batas akses frame.
  * @returns Query builder yang menghasilkan data frame dan nama cafe.
  */
-export default function readFramesRepository(cafeIds?: string[]) {
+export default async function readFramesRepository(cafeIds?: string[], pagination?: ReadFramesPagination) {
   const query = db
     .select({ frame: frames, cafeName: cafes.name })
     .from(frames)
     .leftJoin(cafes, eq(frames.cafeId, cafes.id));
   const newestFirst = desc(frames.createdAt);
 
-  if (!cafeIds) {
-    return query.orderBy(newestFirst);
-  }
-  
-  const listFrames = query
-    .where(or(inArray(frames.cafeId, cafeIds), isNull(frames.cafeId)))
-    .orderBy(newestFirst);
-
-  return listFrames;
+  const condition = pagination
+    ? pagination.search
+      ? and(isNull(frames.cafeId), ilike(frames.title, `%${pagination.search}%`))
+      : isNull(frames.cafeId)
+    : cafeIds
+      ? or(inArray(frames.cafeId, cafeIds), isNull(frames.cafeId))
+      : undefined;
+  const listFrames = condition ? query.where(condition) : query;
+  const [rows, countResult] = await Promise.all([
+    pagination
+      ? listFrames.orderBy(newestFirst).limit(pagination.limit).offset((pagination.page - 1) * pagination.limit)
+      : listFrames.orderBy(newestFirst),
+    pagination
+      ? db.select({ count: sql<number>`COUNT(*)`.mapWith(Number) }).from(frames).where(
+          pagination.search
+            ? and(isNull(frames.cafeId), ilike(frames.title, `%${pagination.search}%`))
+            : isNull(frames.cafeId),
+        )
+      : Promise.resolve(undefined),
+  ]);
+  return { rows, totalItems: countResult?.[0]?.count };
 }

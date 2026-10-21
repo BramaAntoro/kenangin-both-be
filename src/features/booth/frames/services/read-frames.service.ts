@@ -30,6 +30,8 @@ type ReadFramesResult = {
   }[];
 };
 
+type ReadFramesPagination = { page: number; limit: number; search?: string };
+
 /**
  * Membaca dan mengelompokkan frame berdasarkan cakupan akses user.
  *
@@ -48,20 +50,30 @@ export default async function readFramesService(
   userId: string,
   role: string,
   cafeId?: string,
-): Promise<ReadFramesResult> {
+  pagination?: ReadFramesPagination,
+): Promise<{ frames: ReadFramesResult; meta?: { currentPage: number; perPage: number; totalItems: number; totalPages: number } }> {
+  if (role === "super_admin" && !cafeId && pagination) {
+    const { page, limit, search } = pagination;
+    const { rows, totalItems = 0 } = await readFramesRepository(undefined, pagination);
+    return {
+      frames: { global: rows.map(({ frame }) => frame), cafes: [] },
+      meta: { currentPage: page, perPage: limit, totalItems, totalPages: Math.ceil(totalItems / limit) },
+    };
+  }
+
   let result;
   if (role === "super_admin") {
-    result = await readFramesRepository(cafeId ? [cafeId] : undefined);
+    result = (await readFramesRepository(cafeId ? [cafeId] : undefined)).rows;
   } else if (cafeId) {
     const cafe = await findCafeIdByUserIdRepository(userId, cafeId);
     if (!cafe) {
       throw new AppError("Cafe tersebut tidak ada", 404);
     }
 
-    result = await readFramesRepository([cafeId]);
+    result = (await readFramesRepository([cafeId])).rows;
   } else {
     const cafeIds = await readCafeIdsByUserIdRepository(userId);
-    result = await readFramesRepository(cafeIds);
+    result = (await readFramesRepository(cafeIds)).rows;
   }
 
   const groupedFrames = result.reduce<ReadFramesResult>(
@@ -92,5 +104,5 @@ export default async function readFramesService(
     { global: [], cafes: [] },
   );
 
-  return groupedFrames;
+  return { frames: groupedFrames };
 }
