@@ -21,8 +21,8 @@ export default async function updateFrameRepository(
     .update(frames)
     .set({
       ...(data.title !== undefined && { title: data.title }),
-      ...(data.max_photos_slot !== undefined && {
-        maxPhotosSlot: data.max_photos_slot,
+      ...(data.maxPhotosSlot !== undefined && {
+        maxPhotosSlot: data.maxPhotosSlot,
       }),
       ...(data.is_active !== undefined && { isActive: data.is_active }),
       ...(data.frameUrl !== undefined && { frameUrl: data.frameUrl }),

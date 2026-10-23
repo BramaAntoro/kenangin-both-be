@@ -23,8 +23,8 @@ export default async function readFramesRepository(cafeIds?: string[], paginatio
 
   const condition = pagination
     ? pagination.search
-      ? and(isNull(frames.cafeId), ilike(frames.title, `%${pagination.search}%`))
-      : isNull(frames.cafeId)
+      ? ilike(frames.title, `%${pagination.search}%`)
+      : undefined
     : cafeIds
       ? or(inArray(frames.cafeId, cafeIds), isNull(frames.cafeId))
       : undefined;
@@ -34,11 +34,12 @@ export default async function readFramesRepository(cafeIds?: string[], paginatio
       ? listFrames.orderBy(newestFirst).limit(pagination.limit).offset((pagination.page - 1) * pagination.limit)
       : listFrames.orderBy(newestFirst),
     pagination
-      ? db.select({ count: sql<number>`COUNT(*)`.mapWith(Number) }).from(frames).where(
-          pagination.search
-            ? and(isNull(frames.cafeId), ilike(frames.title, `%${pagination.search}%`))
-            : isNull(frames.cafeId),
-        )
+      ? pagination.search
+        ? db
+            .select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
+            .from(frames)
+            .where(ilike(frames.title, `%${pagination.search}%`))
+        : db.select({ count: sql<number>`COUNT(*)`.mapWith(Number) }).from(frames)
       : Promise.resolve(undefined),
   ]);
   return { rows, totalItems: countResult?.[0]?.count };

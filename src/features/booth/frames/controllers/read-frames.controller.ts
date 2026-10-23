@@ -22,13 +22,14 @@ export default async function readFramesController(
     const cafeId = typeof request.query.cafe_id === "string"
       ? request.query.cafe_id
       : undefined;
+    const search = typeof request.query.search === "string" && request.query.search.trim()
+      ? request.query.search.trim()
+      : undefined;
     const pagination = role === "super_admin" && !cafeId && Object.keys(request.query).length
       ? {
           page: Math.max(Number(request.query.page) || 1, 1),
           limit: Math.min(Math.max(Number(request.query.limit) || 5, 1), 50),
-          search: typeof request.query.search === "string" && request.query.search.trim()
-            ? request.query.search.trim()
-            : undefined,
+          ...(search ? { search } : {}),
         }
       : undefined;
     const result = await readFramesService(userId, role, cafeId, pagination);
