@@ -59,6 +59,7 @@ export default async function webhookService(payload: MidtransWebhookDto) {
       {
         paymentStatus,
         paymentType,
+        ...(paymentStatus === "settlement" ? { paidAt: new Date() } : {}),
       },
       tx,
     );

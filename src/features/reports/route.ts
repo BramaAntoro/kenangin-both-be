@@ -2,12 +2,12 @@ import { Router } from "express";
 import requireRole from "../../middlewares/role.middleware.js";
 import readRevenueRecapController from "./controllers/read-revenue-recap.controller.js";
 import readCafeRevenueController from "./controllers/read-cafe-revenue.controller.js";
+import readCafeAdminRevenueController from "./controllers/read-cafe-admin-revenue.controller.js";
 
 const reportsRoute = Router();
 
-reportsRoute.use(requireRole("super_admin"));
-
-reportsRoute.get("/revenue-recap", readRevenueRecapController);
-reportsRoute.get("/revenue-recap/cafe", readCafeRevenueController);
+reportsRoute.get("/revenue-recap/mine", requireRole("cafe_admin"), readCafeAdminRevenueController);
+reportsRoute.get("/revenue-recap", requireRole("super_admin"), readRevenueRecapController);
+reportsRoute.get("/revenue-recap/cafe", requireRole("super_admin"), readCafeRevenueController);
 
 export default reportsRoute;

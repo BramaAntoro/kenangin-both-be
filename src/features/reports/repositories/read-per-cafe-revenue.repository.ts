@@ -77,7 +77,7 @@ export default async function readPerCafeRevenueRepository(
     .from(cafes)
     .leftJoin(
       boothTransactions,
-      sql`${cafes.id} = ${boothTransactions.cafeId} AND ${boothTransactions.paymentStatus} = 'settlement'`,
+      sql`${cafes.id} = ${boothTransactions.cafeId} AND ${boothTransactions.paidAt} IS NOT NULL`,
     )
     .where(searchCondition)
     .groupBy(cafes.id, cafes.name, cafes.address, cafes.isActive)

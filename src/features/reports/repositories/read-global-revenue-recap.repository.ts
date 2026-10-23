@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { isNotNull, sql } from "drizzle-orm";
 import { db } from "../../../db/index.js";
 import { boothTransactions } from "../../../db/schema.js";
 
@@ -20,13 +20,13 @@ export interface GlobalRevenueRecap {
 
 /**
  * Mengambil rekapitulasi global seluruh revenue dari transaksi yang
- * sudah settlement.
+ * sudah ada paidAt (sudah dibayar).
  *
- * Hanya transaksi berstatus `settlement` yang dihitung agar angka
+ * Hanya transaksi yang memiliki `paidAt` yang dihitung agar angka
  * revenue mencerminkan dana yang benar-benar masuk.
  *
  * @returns Objek agregasi revenue global, atau `null` jika belum ada
- * transaksi settlement.
+ * transaksi yang dibayar.
  */
 export default async function readGlobalRevenueRecapRepository(): Promise<GlobalRevenueRecap | null> {
   const [result] = await db
@@ -43,7 +43,7 @@ export default async function readGlobalRevenueRecapRepository(): Promise<Global
       totalProfitAmount: sql<number>`COALESCE(SUM(${boothTransactions.profitAmount}), 0)`.mapWith(Number),
     })
     .from(boothTransactions)
-    .where(eq(boothTransactions.paymentStatus, "settlement"));
+    .where(isNotNull(boothTransactions.paidAt));
 
   return result ?? null;
 }
