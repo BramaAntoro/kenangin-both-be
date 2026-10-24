@@ -19,11 +19,11 @@ export default async function readBoothPackageController(
   response: Response,
 ): Promise<Response> {
   try {
-    const result = await readBoothPackageService(request.user!);
+    const cafes = await readBoothPackageService(request.user!);
 
     return apiSuccess(
       response,
-      { cafes: result },
+      { cafes },
       "Daftar paket booth berhasil diambil",
     );
   } catch (error) {

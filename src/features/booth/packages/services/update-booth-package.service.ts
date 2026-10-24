@@ -1,4 +1,5 @@
 import AppError from "../../../../lib/app-error.js";
+import findCafeIdByUserIdRepository from "../../repositories/find-cafe-id-by-user-id.repository.js";
 import type { UpdateBoothPackageDto } from "../dto/update-booth-package.dto.js";
 import findMinPackagePriceRepository from "../repositories/find-min-package-price.repository.js";
 import updateBoothPackageRepository from "../repositories/update-booth-package.repository.js";
@@ -22,6 +23,13 @@ export default async function updateBoothPackageService(
   userId: string,
   payload: UpdateBoothPackageDto,
 ): Promise<BoothPackageResult> {
+  if (payload.cafeId) {
+    const cafe = await findCafeIdByUserIdRepository(userId, payload.cafeId);
+    if (!cafe) {
+      throw new AppError("Anda tidak memiliki akses ke cafe ini", 403);
+    }
+  }
+
   await findMinPackagePriceRepository(payload.price);
 
   const result = await updateBoothPackageRepository(packageId, userId, payload);

@@ -2,25 +2,13 @@ import { and, asc, desc, eq, exists, sql } from "drizzle-orm";
 import { db } from "../../../../db/index.js";
 import { boothPackages, cafeUsers, cafes } from "../../../../db/schema.js";
 
-/**
- * Membuat query untuk mengambil cafe beserta paket booth-nya.
- *
- * Jika `userId` tersedia, query dibatasi pada cafe yang dikelola user tersebut
- * melalui subquery `EXISTS`. Cara ini mencegah paket terduplikasi ketika satu
- * cafe memiliki lebih dari satu admin. Jika `userId` tidak tersedia, seluruh
- * cafe diikutkan dalam hasil query.
- *
- * Hasil query memiliki satu row per paket. Cafe tanpa paket tetap menghasilkan
- * row dengan `boothPackage` bernilai `null` karena menggunakan `LEFT JOIN`.
- * Pengelompokan row menjadi bentuk respons dilakukan oleh service.
- *
- * @param userId - ID user cafe admin untuk membatasi cakupan cafe; kosong untuk
- *   mengambil seluruh cafe.
- * @returns Promise query result berisi `cafeId`, `cafeName`, dan paket booth.
- */
-export default function readBoothPackagesRepository(
-  userId?: string,
-) {
+type ReadBoothPackagesOptions = {
+  page: number;
+  limit: number;
+};
+
+/** Mengambil seluruh paket tanpa pagination, dikelompokkan service per cafe. */
+export default function readBoothPackagesRepository(userId?: string) {
   const belongsToCurrentUser = userId
     ? exists(
         db
@@ -49,4 +37,79 @@ export default function readBoothPackagesRepository(
       asc(boothPackages.price),
       desc(boothPackages.createdAt),
     );
+}
+
+/** Mengambil satu cafe beserta paket untuk halaman pagination. */
+export async function readPaginatedBoothPackagesRepository(
+  userId: string | undefined,
+  cafeId: string,
+  options: ReadBoothPackagesOptions,
+) {
+  const cafeAccess = userId
+    ? exists(
+        db
+          .select({ value: sql`1` })
+          .from(cafeUsers)
+          .where(
+            and(
+              eq(cafeUsers.cafeId, cafes.id),
+              eq(cafeUsers.userId, userId),
+            ),
+          ),
+      )
+    : undefined;
+  const cafeCondition = cafeAccess
+    ? and(eq(cafes.id, cafeId), cafeAccess)
+    : eq(cafes.id, cafeId);
+
+  const packageBelongsToCurrentUser = userId
+    ? exists(
+        db
+          .select({ value: sql`1` })
+          .from(cafeUsers)
+          .where(
+            and(
+              eq(cafeUsers.cafeId, boothPackages.cafeId),
+              eq(cafeUsers.userId, userId),
+            ),
+          ),
+      )
+    : undefined;
+  const packageCondition = packageBelongsToCurrentUser
+    ? and(eq(boothPackages.cafeId, cafeId), packageBelongsToCurrentUser)
+    : eq(boothPackages.cafeId, cafeId);
+
+  const [[cafe], packageRows, countRows] = await Promise.all([
+    db
+      .select({ id: cafes.id, name: cafes.name })
+      .from(cafes)
+      .where(cafeCondition)
+      .limit(1),
+    db
+      .select({
+        cafeId: cafes.id,
+        cafeName: cafes.name,
+        boothPackage: boothPackages,
+      })
+      .from(boothPackages)
+      .innerJoin(cafes, eq(boothPackages.cafeId, cafes.id))
+      .where(packageCondition)
+      .orderBy(
+        asc(cafes.name),
+        asc(boothPackages.price),
+        desc(boothPackages.createdAt),
+      )
+      .limit(options.limit)
+      .offset((options.page - 1) * options.limit),
+    db
+      .select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
+      .from(boothPackages)
+      .where(packageCondition),
+  ]);
+
+  return {
+    cafe,
+    rows: packageRows,
+    totalItems: countRows[0]?.count ?? 0,
+  };
 }

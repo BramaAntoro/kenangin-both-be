@@ -33,9 +33,14 @@ export default async function createBoothPackageService(
     description,
   } = payload;
 
-  const cafeUser = await findCafeIdByUserIdRepository(userId);
+  const cafeUser = await findCafeIdByUserIdRepository(userId, payload.cafeId);
   if (!cafeUser) {
-    throw new AppError("Akun Anda belum terhubung ke cafe manapun", 404);
+    throw new AppError(
+      payload.cafeId
+        ? "Anda tidak memiliki akses ke cafe ini"
+        : "Akun Anda belum terhubung ke cafe manapun",
+      payload.cafeId ? 403 : 404,
+    );
   }
 
   await findMinPackagePriceRepository(price);

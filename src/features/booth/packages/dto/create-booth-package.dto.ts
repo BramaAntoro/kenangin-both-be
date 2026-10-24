@@ -6,6 +6,7 @@ import { packageFeaturesSchema } from "./package-features.dto.js";
  * `cafe_id` diambil dari JWT token, .
  */
 export const createBoothPackageSchema = z.object({
+  cafeId: z.uuid("ID cafe tidak valid").optional(),
   name: z
     .string()
     .trim()

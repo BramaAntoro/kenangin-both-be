@@ -1,5 +1,8 @@
 import type { JwtTokenPayload } from "../../../../types/jwt/jwt-token-payload.js";
-import readBoothPackagesRepository from "../repositories/read-booth-packages.repository.js";
+import AppError from "../../../../lib/app-error.js";
+import readBoothPackagesRepository, {
+  readPaginatedBoothPackagesRepository,
+} from "../repositories/read-booth-packages.repository.js";
 import type { BoothPackageResult } from "../types/booth-package-result.js";
 
 /**
@@ -9,6 +12,10 @@ type CafeBoothPackagesResult = {
   id: string;
   name: string;
   packages: BoothPackageResult[];
+};
+type PaginationOptions = {
+  page: number;
+  limit: number;
 };
 
 /**
@@ -29,24 +36,51 @@ export default async function readBoothPackageService(
 ): Promise<CafeBoothPackagesResult[]> {
   const userId = user.role === "cafe_admin" ? user.id : undefined;
   const rows = await readBoothPackagesRepository(userId);
-
   const cafesById: Record<string, CafeBoothPackagesResult> = {};
 
   rows.forEach(({ cafeId, cafeName, boothPackage }) => {
-    const cafe =
-      cafesById[cafeId] ??
-      (cafesById[cafeId] = {
-        id: cafeId,
-        name: cafeName,
-        packages: [],
-      });
-
-    if (boothPackage) {
-      cafe.packages.push(boothPackage);
-    }
+    const cafe = cafesById[cafeId] ?? (cafesById[cafeId] = {
+      id: cafeId,
+      name: cafeName,
+      packages: [],
+    });
+    if (boothPackage) cafe.packages.push(boothPackage);
   });
 
-  const cafes = Object.values(cafesById);
+  return Object.values(cafesById);
+}
 
-  return cafes;
+export async function readCafeBoothPackagesService(
+  user: JwtTokenPayload,
+  cafeId: string,
+  options: PaginationOptions,
+): Promise<{
+  cafe: CafeBoothPackagesResult;
+  meta: {
+    currentPage: number;
+    perPage: number;
+    totalItems: number;
+    totalPages: number;
+  };
+}> {
+  const userId = user.role === "cafe_admin" ? user.id : undefined;
+  const result = await readPaginatedBoothPackagesRepository(
+    userId,
+    cafeId,
+    options,
+  );
+  if (!result.cafe) throw new AppError("Cafe tidak ditemukan", 404);
+
+  return {
+    cafe: {
+      ...result.cafe,
+      packages: result.rows.map(({ boothPackage }) => boothPackage),
+    },
+    meta: {
+      currentPage: options.page,
+      perPage: options.limit,
+      totalItems: result.totalItems,
+      totalPages: Math.ceil(result.totalItems / options.limit),
+    },
+  };
 }

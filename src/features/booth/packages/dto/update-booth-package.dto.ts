@@ -5,6 +5,7 @@ import { packageFeaturesSchema } from "./package-features.dto.js";
  * Schema validasi data paket booth yang akan diperbarui.
  */
 export const updateBoothPackageSchema = z.object({
+  cafeId: z.uuid("ID cafe tidak valid").optional(),
   name: z
     .string()
     .trim()
