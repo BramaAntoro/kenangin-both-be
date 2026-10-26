@@ -11,7 +11,7 @@ import transactionInitiateService from "../service/transaction-initiate.service.
  * Data cafe diambil dari user yang sedang login, sehingga caller tidak dapat
  * membuat transaksi untuk cafe lain.
  *
- * @param request - Request berisi `packageId` dan `kioskId` yang tervalidasi.
+ * @param request - Request berisi `packageId` dan `kioskId` opsional.
  * @param response - Response Express untuk hasil transaksi atau error.
  * @returns Promise yang menghasilkan response JSON transaksi.
  */

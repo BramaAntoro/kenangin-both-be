@@ -37,7 +37,13 @@ export default function readBoothPackagesByCafeRepository(
       boothPackage: boothPackages,
     })
     .from(cafes)
-    .leftJoin(boothPackages, eq(boothPackages.cafeId, cafes.id))
+    .leftJoin(
+      boothPackages,
+      and(
+        eq(boothPackages.cafeId, cafes.id),
+        eq(boothPackages.isActive, true),
+      ),
+    )
     .where(and(eq(cafes.id, cafeId), belongsToCurrentUser))
     .orderBy(asc(boothPackages.price), desc(boothPackages.createdAt));
 }

@@ -1,27 +1,38 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../../../../db/index.js";
-import { boothPackages, kiosks } from "../../../../db/schema.js";
+import { boothPackages, cafeUsers, kiosks } from "../../../../db/schema.js";
 
 /**
- * Mengambil nama dan harga paket yang aktif untuk cafe dan kiosk aktif.
+ * Mengambil paket aktif pada kiosk aktif yang dikelola oleh user.
  *
- * @param input - ID cafe, paket, dan kiosk yang akan dicari.
+ * @param input - ID user, paket, dan kiosk yang akan dicari.
  * @returns Data harga dan nama paket, atau `undefined` jika tidak ditemukan.
  */
 export default async function readTransactionInitiatePackagePriceRepository(
-  input: { cafeId: string; packageId: string; kioskId: string },
+  input: { userId: string; packageId: string; kioskId: string },
 ) {
   const [result] = await db
-    .select({ price: boothPackages.price, name: boothPackages.name })
+    .select({
+      price: boothPackages.price,
+      name: boothPackages.name,
+      cafeId: kiosks.cafeId,
+      kioskId: kiosks.id,
+    })
     .from(boothPackages)
     .innerJoin(kiosks, eq(kiosks.cafeId, boothPackages.cafeId))
+    .innerJoin(
+      cafeUsers,
+      and(
+        eq(cafeUsers.cafeId, kiosks.cafeId),
+        eq(cafeUsers.userId, input.userId),
+      ),
+    )
     .where(
       and(
-        eq(boothPackages.cafeId, input.cafeId),
         eq(boothPackages.id, input.packageId),
         eq(boothPackages.isActive, true),
-        eq(kiosks.id, input.kioskId),
         eq(kiosks.status, "active"),
+        eq(kiosks.id, input.kioskId),
       ),
     )
     .limit(1);

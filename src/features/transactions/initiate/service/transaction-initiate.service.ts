@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { db } from "../../../../db/index.js";
 import AppError from "../../../../lib/app-error.js";
-import findCafeIdByUserIdRepository from "../../../booth/repositories/find-cafe-id-by-user-id.repository.js";
 import type { transactionInitiateDto } from "../dto/transaction-initiate.dto.js";
 import type { JwtTokenPayload } from "../../../../types/jwt/jwt-token-payload.js";
 import createBoothTransactionRepository from "../repositories/create-booth-transaction.repository.js";
@@ -22,22 +21,17 @@ export default async function transactionInitiateService(
   payload: transactionInitiateDto,
   user: JwtTokenPayload,
 ) {
-  const cafe = await findCafeIdByUserIdRepository(user.id);
-  if (!cafe) {
-    throw new AppError("Cafe tidak ada", 404);
-  }
-
-  const { packageId, kioskId } = payload;
+  const { packageId } = payload;
   const packageData = await readTransactionInitiatePackagePriceRepository({
-    cafeId: cafe.cafeId,
+    userId: user.id,
     packageId,
-    kioskId,
+    kioskId: payload.kioskId,
   });
   if (!packageData) {
-    throw new AppError("Paket atau kiosk tidak ditemukan", 404);
+    throw new AppError("Paket tidak ditemukan", 404);
   }
 
-  const revenueShare = await readCafeRevenueShareRepository(cafe.cafeId);
+  const revenueShare = await readCafeRevenueShareRepository(packageData.cafeId);
   if (!revenueShare) {
     throw new AppError("Cafe tidak ada", 404);
   }
@@ -77,8 +71,8 @@ export default async function transactionInitiateService(
 
     return await createBoothTransactionRepository(
       {
-        kioskId,
-        cafeId: cafe.cafeId,
+        kioskId: packageData.kioskId,
+        cafeId: packageData.cafeId,
         packageId,
         orderId,
         grossAmount,
