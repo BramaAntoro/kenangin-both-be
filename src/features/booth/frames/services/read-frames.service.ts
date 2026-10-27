@@ -67,10 +67,19 @@ export default async function readFramesService(
   let result;
   let locations: { id: string; name: string }[] | undefined;
 
-  if (role === "super_admin" && !cafeId && pagination) {
-    const response = await readFramesRepository(undefined, pagination);
+  if (pagination && (role === "super_admin" || cafeId)) {
+    if (role === "cafe_admin" && cafeId) {
+      const cafe = await findCafeIdByUserIdRepository(userId, cafeId);
+      if (!cafe) {
+        throw new AppError("Cafe tersebut tidak ada", 404);
+      }
+    }
+    const response = await readFramesRepository(
+      cafeId ? [cafeId] : undefined,
+      pagination,
+    );
     result = response.rows;
-    locations = response.locations;
+    if (role === "super_admin" && !cafeId) locations = response.locations;
     const totalItems = response.totalItems ?? 0;
     paginationMeta = {
       currentPage: pagination.page,

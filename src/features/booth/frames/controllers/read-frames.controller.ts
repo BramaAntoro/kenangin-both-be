@@ -28,7 +28,8 @@ export default async function readFramesController(
     const location = typeof request.query.location === "string"
       ? request.query.location
       : "all";
-    const pagination = role === "super_admin" && !cafeId
+    const hasPagination = request.query.page !== undefined || request.query.limit !== undefined;
+    const pagination = (role === "super_admin" && !cafeId) || (cafeId && hasPagination)
       ? {
           page: Math.max(Number(request.query.page) || 1, 1),
           limit: Math.min(Math.max(Number(request.query.limit) || 5, 1), 50),

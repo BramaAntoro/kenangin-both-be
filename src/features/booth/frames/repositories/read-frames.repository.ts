@@ -28,6 +28,9 @@ export default async function readFramesRepository(cafeIds?: string[], paginatio
 
   const conditions = [];
   if (pagination) {
+    if (cafeIds) {
+      conditions.push(or(inArray(frames.cafeId, cafeIds), isNull(frames.cafeId))!);
+    }
     if (pagination.location === "global") {
       conditions.push(isNull(frames.cafeId));
     } else if (pagination.location && pagination.location !== "all") {
