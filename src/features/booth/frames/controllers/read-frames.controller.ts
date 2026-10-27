@@ -25,16 +25,29 @@ export default async function readFramesController(
     const search = typeof request.query.search === "string" && request.query.search.trim()
       ? request.query.search.trim()
       : undefined;
-    const pagination = role === "super_admin" && !cafeId && Object.keys(request.query).length
+    const location = typeof request.query.location === "string"
+      ? request.query.location
+      : "all";
+    const pagination = role === "super_admin" && !cafeId
       ? {
           page: Math.max(Number(request.query.page) || 1, 1),
           limit: Math.min(Math.max(Number(request.query.limit) || 5, 1), 50),
+          location,
           ...(search ? { search } : {}),
         }
       : undefined;
     const result = await readFramesService(userId, role, cafeId, pagination);
 
-    return apiSuccess(response, { frames: result.frames }, "Daftar frame berhasil diambil", 200, result.meta);
+    return apiSuccess(
+      response,
+      {
+        frames: result.frames,
+        ...(result.locations && { locations: result.locations }),
+      },
+      "Daftar frame berhasil diambil",
+      200,
+      result.meta,
+    );
   } catch (error) {
     const { message, statusCode, details } = handleApiError(error);
     return apiError(response, message, statusCode, details);

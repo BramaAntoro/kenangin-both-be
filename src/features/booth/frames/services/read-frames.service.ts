@@ -30,7 +30,12 @@ type ReadFramesResult = {
   }[];
 };
 
-type ReadFramesPagination = { page: number; limit: number; search?: string };
+type ReadFramesPagination = {
+  page: number;
+  limit: number;
+  search?: string;
+  location?: string;
+};
 
 /**
  * Membaca dan mengelompokkan frame berdasarkan cakupan akses user.
@@ -51,22 +56,27 @@ export default async function readFramesService(
   role: string,
   cafeId?: string,
   pagination?: ReadFramesPagination,
-): Promise<{ frames: ReadFramesResult; meta?: { currentPage: number; perPage: number; totalItems: number; totalPages: number } }> {
+): Promise<{
+  frames: ReadFramesResult;
+  locations?: { id: string; name: string }[];
+  meta?: { currentPage: number; perPage: number; totalItems: number; totalPages: number };
+}> {
   let paginationMeta:
     | { currentPage: number; perPage: number; totalItems: number; totalPages: number }
     | undefined;
   let result;
+  let locations: { id: string; name: string }[] | undefined;
 
   if (role === "super_admin" && !cafeId && pagination) {
-    const { page, limit, search } = pagination;
     const response = await readFramesRepository(undefined, pagination);
     result = response.rows;
+    locations = response.locations;
     const totalItems = response.totalItems ?? 0;
     paginationMeta = {
-      currentPage: page,
-      perPage: limit,
+      currentPage: pagination.page,
+      perPage: pagination.limit,
       totalItems,
-      totalPages: Math.ceil(totalItems / limit),
+      totalPages: Math.ceil(totalItems / pagination.limit),
     };
   } else if (role === "super_admin") {
     result = (await readFramesRepository(cafeId ? [cafeId] : undefined)).rows;
@@ -110,5 +120,9 @@ export default async function readFramesService(
     { global: [], cafes: [] },
   );
 
-  return { frames: groupedFrames, ...(paginationMeta && { meta: paginationMeta }) };
+  return {
+    frames: groupedFrames,
+    ...(locations && { locations }),
+    ...(paginationMeta && { meta: paginationMeta }),
+  };
 }

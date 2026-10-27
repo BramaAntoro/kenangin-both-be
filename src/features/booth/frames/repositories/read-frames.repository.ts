@@ -2,7 +2,12 @@ import { and, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import { db } from "../../../../db/index.js";
 import { cafes, frames } from "../../../../db/schema.js";
 
-type ReadFramesPagination = { page: number; limit: number; search?: string };
+type ReadFramesPagination = {
+  page: number;
+  limit: number;
+  search?: string;
+  location?: string;
+};
 
 /**
  * Mengambil frame beserta nama cafe pemiliknya.
@@ -21,26 +26,40 @@ export default async function readFramesRepository(cafeIds?: string[], paginatio
     .leftJoin(cafes, eq(frames.cafeId, cafes.id));
   const newestFirst = desc(frames.createdAt);
 
-  const condition = pagination
-    ? pagination.search
-      ? ilike(frames.title, `%${pagination.search}%`)
-      : undefined
-    : cafeIds
-      ? or(inArray(frames.cafeId, cafeIds), isNull(frames.cafeId))
-      : undefined;
-  const listFrames = condition ? query.where(condition) : query;
-  const [rows, countResult] = await Promise.all([
+  const conditions = [];
+  if (pagination) {
+    if (pagination.location === "global") {
+      conditions.push(isNull(frames.cafeId));
+    } else if (pagination.location && pagination.location !== "all") {
+      conditions.push(eq(frames.cafeId, pagination.location));
+    }
+    if (pagination.search) {
+      conditions.push(ilike(frames.title, `%${pagination.search}%`));
+    }
+  } else if (cafeIds) {
+    conditions.push(or(inArray(frames.cafeId, cafeIds), isNull(frames.cafeId))!);
+  }
+  const condition = conditions.length ? and(...conditions) : undefined;
+  const [rows, countResult, locations] = await Promise.all([
     pagination
-      ? listFrames.orderBy(newestFirst).limit(pagination.limit).offset((pagination.page - 1) * pagination.limit)
-      : listFrames.orderBy(newestFirst),
+      ? (condition ? query.where(condition) : query)
+          .orderBy(newestFirst)
+          .limit(pagination.limit)
+          .offset((pagination.page - 1) * pagination.limit)
+      : (condition ? query.where(condition) : query).orderBy(newestFirst),
     pagination
-      ? pagination.search
-        ? db
-            .select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
-            .from(frames)
-            .where(ilike(frames.title, `%${pagination.search}%`))
-        : db.select({ count: sql<number>`COUNT(*)`.mapWith(Number) }).from(frames)
+      ? db
+          .select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
+          .from(frames)
+          .where(condition)
+      : Promise.resolve(undefined),
+    pagination
+      ? db.select({ id: cafes.id, name: cafes.name }).from(cafes).orderBy(cafes.name)
       : Promise.resolve(undefined),
   ]);
-  return { rows, totalItems: countResult?.[0]?.count };
+  return {
+    rows,
+    totalItems: countResult?.[0]?.count,
+    locations,
+  };
 }
