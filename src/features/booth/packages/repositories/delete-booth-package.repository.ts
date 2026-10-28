@@ -1,7 +1,16 @@
 import { and, eq, exists, sql } from "drizzle-orm";
 import { db } from "../../../../db/index.js";
-import { boothPackages, cafeUsers } from "../../../../db/schema.js";
+import {
+  boothPackages,
+  boothTransactions,
+  cafeUsers,
+} from "../../../../db/schema.js";
 import type { BoothPackageResult } from "../types/booth-package-result.js";
+
+export type DeleteBoothPackageResult =
+  | { status: "not_found" }
+  | { status: "has_transactions"; packageName: string }
+  | { status: "deleted"; boothPackage: BoothPackageResult };
 
 /**
  * Menghapus permanen paket milik cafe yang dikelola oleh user.
@@ -14,26 +23,58 @@ import type { BoothPackageResult } from "../types/booth-package-result.js";
 export default async function deleteBoothPackageRepository(
   packageId: string,
   userId: string,
-): Promise<BoothPackageResult | undefined> {
-  const [result] = await db
-    .delete(boothPackages)
-    .where(
-      and(
-        eq(boothPackages.id, packageId),
-        exists(
-          db
-            .select({ value: sql`1` })
-            .from(cafeUsers)
-            .where(
-              and(
-                eq(cafeUsers.cafeId, boothPackages.cafeId),
-                eq(cafeUsers.userId, userId),
+): Promise<DeleteBoothPackageResult> {
+  return db.transaction(async (transaction) => {
+    const [existingPackage] = await transaction
+      .select({ id: boothPackages.id, name: boothPackages.name })
+      .from(boothPackages)
+      .where(
+        and(
+          eq(boothPackages.id, packageId),
+          exists(
+            transaction
+              .select({ value: sql`1` })
+              .from(cafeUsers)
+              .where(
+                and(
+                  eq(cafeUsers.cafeId, boothPackages.cafeId),
+                  eq(cafeUsers.userId, userId),
+                ),
               ),
-            ),
+          ),
         ),
-      ),
-    )
-    .returning();
+      )
+      .for("update");
 
-  return result as BoothPackageResult | undefined;
+    if (!existingPackage) {
+      return { status: "not_found" };
+    }
+
+    const [existingTransaction] = await transaction
+      .select({ id: boothTransactions.id })
+      .from(boothTransactions)
+      .where(eq(boothTransactions.packageId, packageId))
+      .limit(1);
+
+    if (existingTransaction) {
+      return {
+        status: "has_transactions",
+        packageName: existingPackage.name,
+      };
+    }
+
+    const [deletedPackage] = await transaction
+      .delete(boothPackages)
+      .where(eq(boothPackages.id, packageId))
+      .returning();
+
+    if (!deletedPackage) {
+      return { status: "not_found" };
+    }
+
+    return {
+      status: "deleted",
+      boothPackage: deletedPackage,
+    };
+  });
 }

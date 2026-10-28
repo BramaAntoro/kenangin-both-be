@@ -16,9 +16,16 @@ export default async function deleteBoothPackageService(
 ): Promise<BoothPackageResult> {
   const result = await deleteBoothPackageRepository(packageId, userId);
 
-  if (!result) {
+  if (result.status === "not_found") {
     throw new AppError("Paket tidak ditemukan", 404);
   }
 
-  return result;
+  if (result.status === "has_transactions") {
+    throw new AppError(
+      `Paket ${result.packageName} tidak bisa dihapus karena sudah digunakan pada transaksi.`,
+      409,
+    );
+  }
+
+  return result.boothPackage;
 }
