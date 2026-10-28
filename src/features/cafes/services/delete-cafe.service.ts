@@ -1,4 +1,5 @@
 import AppError from "../../../lib/app-error.js";
+import readCafeKiosksRepository from "../repositories/read-cafe-kiosks.repository.js";
 import deleteCafeRepository from "../repositories/delete-cafe.repository.js";
 import type { DeleteCafeResult } from "../types/delete-cafe-result.js";
 
@@ -12,6 +13,16 @@ import type { DeleteCafeResult } from "../types/delete-cafe-result.js";
 export default async function deleteCafeService(
   id: string,
 ): Promise<DeleteCafeResult> {
+  const kiosks = await readCafeKiosksRepository(id);
+
+  if (kiosks.length > 0) {
+    const kioskNames = kiosks.map((kiosk) => kiosk.name).join(", ");
+    throw new AppError(
+      `Cafe tidak bisa dihapus karena masih memiliki kiosk: ${kioskNames}. Hapus atau pindahkan kiosk terlebih dahulu.`,
+      409,
+    );
+  }
+
   const result = await deleteCafeRepository(id);
 
   if (!result) {
