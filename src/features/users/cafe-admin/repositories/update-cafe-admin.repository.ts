@@ -10,6 +10,8 @@ type UpdateCafeAdminRepositoryData = {
   id: string;
   email?: string | undefined;
   name?: string | undefined;
+  accountNumber?: string | null | undefined;
+  bankName?: string | null | undefined;
   hashedPassword?: string | undefined;
 };
 
@@ -27,6 +29,8 @@ export default async function updateCafeAdminRepository(
     .set({
       email: data.email,
       name: data.name,
+      accountNumber: data.accountNumber,
+      bankName: data.bankName,
       password: data.hashedPassword,
       updatedAt: new Date(),
     })
@@ -35,6 +39,8 @@ export default async function updateCafeAdminRepository(
       id: users.id,
       email: users.email,
       name: users.name,
+      accountNumber: users.accountNumber,
+      bankName: users.bankName,
       role: users.role,
     });
 

@@ -67,6 +67,8 @@ export const users = pgTable("users", {
   email: varchar("email").notNull().unique(),
   password: varchar("password").notNull(),
   name: varchar("name").notNull(),
+  accountNumber: varchar("account_number"),
+  bankName: varchar("bank_name"),
   role: userRoleEnum("role").notNull().default("cafe_admin"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),

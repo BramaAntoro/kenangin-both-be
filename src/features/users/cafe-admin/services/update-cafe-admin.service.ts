@@ -23,7 +23,7 @@ type UpdateCafeAdminServiceData = {
 export default async function updateCafeAdminService(
   payload: UpdateCafeAdminServiceData,
 ): Promise<UserResult> {
-  const { id, email, name, password } = payload
+  const { id, email, name, accountNumber, bankName, password } = payload
   if (email) {
     const existingUser = await existsUserByEmailRepository(email, id);
 
@@ -39,6 +39,8 @@ export default async function updateCafeAdminService(
     id,
     email,
     name,
+    accountNumber,
+    bankName,
     hashedPassword,
   });
 

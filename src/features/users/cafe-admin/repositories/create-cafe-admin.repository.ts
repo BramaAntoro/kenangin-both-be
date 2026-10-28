@@ -5,7 +5,9 @@ import type { UserResult } from "../../../../types/users/user-result.js";
 type CreateCafeAdminData = {
   email: string;
   name: string;
-  hasedPassword: string
+  accountNumber?: string | null | undefined;
+  bankName?: string | null | undefined;
+  hasedPassword: string;
 }
 
 /**
@@ -20,6 +22,8 @@ export default async function createCafeAdminRepository(data: CreateCafeAdminDat
     .values({
       email: data.email,
       name: data.name,
+      accountNumber: data.accountNumber,
+      bankName: data.bankName,
       password: data.hasedPassword,
       role: "cafe_admin",
     })
@@ -27,6 +31,8 @@ export default async function createCafeAdminRepository(data: CreateCafeAdminDat
       id: users.id,
       email: users.email,
       name: users.name,
+      accountNumber: users.accountNumber,
+      bankName: users.bankName,
       role: users.role,
     });
 

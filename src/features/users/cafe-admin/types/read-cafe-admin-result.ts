@@ -5,5 +5,7 @@ export type ReadCafeAdminResult = {
   id: string;
   name: string;
   email: string;
+  accountNumber: string | null;
+  bankName: string | null;
   tanggalBergabung: Date | null;
 };

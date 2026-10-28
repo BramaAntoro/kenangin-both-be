@@ -18,6 +18,8 @@ export default async function findUserByEmailRepository(
       id: users.id,
       email: users.email,
       name: users.name,
+      accountNumber: users.accountNumber,
+      bankName: users.bankName,
       password: users.password,
       role: users.role,
     })

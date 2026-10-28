@@ -24,7 +24,7 @@ type CreateCafeAdminServiceResult = {
 export default async function createCafeAdminService(
   payload: CreateCafeAdminDto,
 ): Promise<CreateCafeAdminServiceResult> {
-  const { email, name, password } = payload;
+  const { email, name, accountNumber, bankName, password } = payload;
   const existingUser = await existsUserByEmailRepository(email);
 
   if (existingUser) {
@@ -35,6 +35,8 @@ export default async function createCafeAdminService(
   const user = await createCafeAdminRepository({
     email,
     name,
+    accountNumber,
+    bankName,
     hasedPassword,
   });
 

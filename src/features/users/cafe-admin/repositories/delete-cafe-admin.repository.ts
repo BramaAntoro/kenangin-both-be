@@ -19,6 +19,8 @@ export default async function deleteCafeAdminRepository(
       id: users.id,
       email: users.email,
       name: users.name,
+      accountNumber: users.accountNumber,
+      bankName: users.bankName,
       role: users.role,
     });
 

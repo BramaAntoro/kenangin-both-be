@@ -16,6 +16,18 @@ export const createCafeAdminSchema = z.object({
     .trim()
     .min(1, "Nama wajib diisi")
     .max(50, "Nama maksimal 50 karakter"),
+  accountNumber: z
+    .string()
+    .trim()
+    .max(50, "Nomor rekening maksimal 50 karakter")
+    .transform((value) => value || null)
+    .optional(),
+  bankName: z
+    .string()
+    .trim()
+    .max(100, "Nama bank maksimal 100 karakter")
+    .transform((value) => value || null)
+    .optional(),
   password: z
     .string()
     .min(8, "Password minimal 8 karakter")

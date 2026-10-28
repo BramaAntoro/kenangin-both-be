@@ -40,6 +40,8 @@ export default async function readCafeAdminRepository({
       id: users.id,
       name: users.name,
       email: users.email,
+      accountNumber: users.accountNumber,
+      bankName: users.bankName,
       tanggalBergabung: users.createdAt,
     })
     .from(users)
